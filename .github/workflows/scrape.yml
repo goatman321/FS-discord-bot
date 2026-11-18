@@ -37,6 +37,15 @@ jobs:
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "action@github.com"
-          git add cache.json || true
-          git commit -m "Aktualizace cache.json" || exit 0
+          
+          # 1. Pojistka: Vytvoří prázdný soubor, pokud ho scraper neudělal
+          touch cache.json 
+          
+          # 2. Přidá ho do Gitu (teď už stoprocentně existuje)
+          git add cache.json
+          
+          # 3. Zkontroluje, jestli se v něm něco změnilo. Pokud ano, uloží to.
+          git diff --staged --quiet || git commit -m "Aktualizace cache.json"
+          
+          # 4. Nahraje změny na GitHub
           git push

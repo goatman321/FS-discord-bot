@@ -3,7 +3,7 @@ name: Casino Scraper
 on:
   schedule:
     # Spouští se každou hodinu v 15. minutě (např. 8:15, 9:15)
-    # Záměrně nedáváme 0. minutu, kdy běží miliony dalších botů a fronty na GitHubu bývají plné
+  # Záměrně nedáváme 0. minutu, kdy běží miliony dalších botů a fronty na GitHubu bývají plné
     - cron: '15 * * * *'
   workflow_dispatch: # Umožňuje spustit workflow ručně tlačítkem
 
@@ -37,7 +37,6 @@ jobs:
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "action@github.com"
-          git add cache.json
-          # Commitne jen tehdy, pokud se soubor cache.json změnil
+          git add cache.json || true
           git commit -m "Aktualizace cache.json" || exit 0
           git push

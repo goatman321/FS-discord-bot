@@ -1,19 +1,22 @@
-name: Casino Scraper
+name: Free spiny dnes
 
 on:
   schedule:
-    # Spouští se každou hodinu v 15. minutě (např. 8:15, 9:15)
-  # Záměrně nedáváme 0. minutu, kdy běží miliony dalších botů a fronty na GitHubu bývají plné
-    - cron: '15 * * * *'
-  workflow_dispatch: # Umožňuje spustit workflow ručně tlačítkem
+    # GitHub cron běží v UTC. 13:00 pražského času je:
+    #   - 11:00 UTC v letním čase (CEST)
+    #   - 12:00 UTC v zimním čase (CET)
+    # Spouští se oba crony, scraper sám pustí jen ten správný.
+    - cron: '0 11 * * *'
+    - cron: '0 12 * * *'
+  workflow_dispatch: # ruční spuštění tlačítkem "Run workflow"
 
-# Práva nutná k tomu, aby mohl bot commitnout upravenou cache zpět
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Stáhnutí repozitáře
         uses: actions/checkout@v4
@@ -21,31 +24,14 @@ jobs:
       - name: Nastavení Pythonu
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
+          cache: pip
 
       - name: Instalace závislostí
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4
+        run: pip install -r requirements.txt
 
       - name: Spuštění scraperu
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          GITHUB_SCHEDULE: ${{ github.event.schedule }}
         run: python scraper.py
-
-      - name: Commit a push upravené cache
-        run: |
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "action@github.com"
-          
-          # 1. Pojistka: Vytvoří prázdný soubor, pokud ho scraper neudělal
-          touch cache.json 
-          
-          # 2. Přidá ho do Gitu (teď už stoprocentně existuje)
-          git add cache.json
-          
-          # 3. Zkontroluje, jestli se v něm něco změnilo. Pokud ano, uloží to.
-          git diff --staged --quiet || git commit -m "Aktualizace cache.json"
-          
-          # 4. Nahraje změny na GitHub
-          git push

@@ -10,13 +10,18 @@ on:
     - cron: '0 12 * * *'
   workflow_dispatch: # ruční spuštění tlačítkem "Run workflow"
 
+# Nutné pro commit sent_messages.json (ID zpráv ke smazání příště)
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: fs-discord-bot
+  cancel-in-progress: false
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Stáhnutí repozitáře
         uses: actions/checkout@v4
@@ -35,3 +40,14 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           GITHUB_SCHEDULE: ${{ github.event.schedule }}
         run: python scraper.py
+
+      - name: Uložení ID odeslaných zpráv
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sent_messages.json 2>/dev/null || exit 0
+          git diff --staged --quiet && exit 0
+          git commit -m "Aktualizace ID odeslaných zpráv"
+          git pull --rebase
+          git push

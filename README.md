@@ -2,9 +2,15 @@
 
 Každý den ve **13:00 (pražského času)** pošle na Discord přes webhook:
 
-1. **Přehled dnešních free spinů** z [vyhraj.cz](https://vyhraj.cz/rubrika/freespiny-bonusy-dnes/).
-   Bonusy se štítkem **Bez podmínek**, **Bez vkladu** nebo **Pouze za vklad** jsou nahoře, výrazně zeleně (🟢).
+1. **Hlavičku** s dnešním datem a počtem zvýrazněných bonusů.
 2. **Dnešního Klikaře dne** z [apollogames.cz/klikar](https://www.apollogames.cz/klikar).
+3. **Přehled dnešních free spinů** z [vyhraj.cz](https://vyhraj.cz/rubrika/freespiny-bonusy-dnes/)
+   s detaily (popis, hry, počet a hodnota FS, vklad, protočení, platnost, promokód, návod).
+   Bonusy se štítkem **Bez podmínek**, **Bez vkladu** nebo **Pouze za vklad** jsou nahoře, výrazně zeleně (🟢).
+
+Před každým novým výpisem bot **smaže svůj předchozí výpis**. ID odeslaných zpráv si ukládá
+do `sent_messages.json` (workflow ho po běhu commitne zpět do repa).
+Webhook umí mazat jen zprávy, které sám poslal – zprávy jiných lidí v kanálu zůstanou.
 
 Běží přes GitHub Actions (`.github/workflows/scrape.yml`).
 
